@@ -30,26 +30,28 @@ function onMessageCallback(msg) {
 }
 
 function start() {
-    console.log("start to register into cloudamqp queue..");
+    console.log("start to register into cloudamqp queue...");
 
     amqp.connect('amqp://yjoinmoy:INZGR8Esm-kgVfzCrvuZ0UJGYuRhqw_W@hyena.rmq.cloudamqp.com/yjoinmoy').then(function(conn) {
-        //return when(
+          console.log("Got Connection...");
+
           conn.createChannel().then(function(messageChannel) {
+            console.log("Created Channel...");
+
             ch = messageChannel;
 
             var ok = ch.assertQueue('', {exclusive: true})
                 .then(function(qok) { return qok.queue; });
 
-            ok = ok.then(function(queue) {
-                return ch.consume(queue, onMessageCallback, {noAck: true})
-                  .then(function() { asyncCallbackQueue = queue; });
+            ok.then(function(queue) {
+                ch.consume(queue, onMessageCallback, {noAck: true})
+                  .then(function() {
+                      asyncCallbackQueue = queue;
+                      console.log("Aync callback queue is ready...");
+                  });
             });
-
-
-
-        //})).ensure(function() { conn.close(); });
         });
-    });//.then(null, console.warn);
+    });
 }
 
 console.log('node.js application starting...');
@@ -59,6 +61,7 @@ function sendTaskToQueue(taskMsg, success, failure) {
 
     msgCallbackHandler[corrId] = function(replyMsg) {
         console.log('[xxx] got reply:' + replyMsg);
+        success && success(replyMsg);
     };
 
     ch.sendToQueue('rpc_queue', new Buffer(taskMsg), {
