@@ -7,17 +7,15 @@ function start() {
             var q = 'rpc_queue';
             var ok = ch.assertQueue(q, {durable: true, auto_delete: true});
             var ok = ok.then(function() {
-              ch.prefetch(1);
-              return ch.consume(q, reply);
+                ch.prefetch(1);
+                return ch.consume(q, reply);
             });
             return ok.then(function() {
-              console.log(' [x] Awaiting RPC requests');
+                console.log(' [x] Awaiting RPC requests');
             });
 
             function reply(msg) {
                 console.log("xxx...message received:", msg);
-                var n = parseInt(msg.content.toString());
-                console.log(' [.] fib(%d)', n);
                 var response = 'here is the response... here we go...';
                 ch.sendToQueue(msg.properties.replyTo,
                                new Buffer(response.toString()),

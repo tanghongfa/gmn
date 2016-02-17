@@ -6,47 +6,70 @@ var defer = when.defer;
 var uuid = require('node-uuid');
 var http = require('http');
 
+var ch = null;
+
+
+/*
+* This is a Mapping from uuid (message identifier to the callback handler function).
+*
+* Whenever try to send a RPC style request, it will push a callback handler into this object.
+*/
+var msgCallbackHandler = {};
+var asyncCallbackQueue = null;
+
+function onMessageCallback(msg) {
+    var corrId = msg.properties.correlationId;
+    console.log("received callback msg for corrId:" + corrId)
+    var handler = msgCallbackHandler[corrId];
+    if(handler) {
+        handler(msg.content.toString());
+        delete msgCallbackHandler[corrId];
+    } else {
+        console.log("No handler for corrId:" + corrId);
+    }
+}
+
 function start() {
+    console.log("start to register into cloudamqp queue..");
+
     amqp.connect('amqp://yjoinmoy:INZGR8Esm-kgVfzCrvuZ0UJGYuRhqw_W@hyena.rmq.cloudamqp.com/yjoinmoy').then(function(conn) {
-      return when(conn.createChannel().then(function(ch) {
-        var answer = defer();
-        var corrId = uuid();
-        function maybeAnswer(msg) {
-          if (msg.properties.correlationId === corrId) {
-            answer.resolve(msg.content.toString());
-          }
-        }
+        //return when(
+          conn.createChannel().then(function(messageChannel) {
+            ch = messageChannel;
 
-        var ok = ch.assertQueue('', {exclusive: true})
-          .then(function(qok) { return qok.queue; });
+            var ok = ch.assertQueue('', {exclusive: true})
+                .then(function(qok) { return qok.queue; });
 
-        ok = ok.then(function(queue) {
-          return ch.consume(queue, maybeAnswer, {noAck: true})
-            .then(function() { return queue; });
+            ok = ok.then(function(queue) {
+                return ch.consume(queue, onMessageCallback, {noAck: true})
+                  .then(function() { asyncCallbackQueue = queue; });
+            });
+
+
+
+        //})).ensure(function() { conn.close(); });
         });
-
-        ok = ok.then(function(queue) {
-          console.log(' [x] Requesting fib');
-          ch.sendToQueue('rpc_queue', new Buffer('hello world message from RPC client'), {
-            correlationId: corrId, replyTo: queue
-          });
-          return answer.promise;
-        });
-
-        return ok.then(function(respMsg) {
-          console.log(' [.] Got response', respMsg);
-        });
-      })).ensure(function() { conn.close(); });
-    }).then(null, console.warn);
+    });//.then(null, console.warn);
 }
 
 console.log('node.js application starting...');
 
+function sendTaskToQueue(taskMsg, success, failure) {
+    var corrId = uuid();
+
+    msgCallbackHandler[corrId] = function(replyMsg) {
+        console.log('[xxx] got reply:' + replyMsg);
+    };
+
+    ch.sendToQueue('rpc_queue', new Buffer(taskMsg), {
+        correlationId: corrId, replyTo: asyncCallbackQueue
+    });
+}
+
 var svr = http.createServer(function(req, resp) {
-
     console.log("start to initate a RPC call..");
+    sendTaskToQueue('hey, here we goo..');
     resp.end('Hello, World! -- sent the job');
-
 });
 
 svr.listen(9000, function() {
