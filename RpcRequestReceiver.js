@@ -71,8 +71,9 @@ function sendTaskToQueue(taskMsg, success, failure) {
 
 var svr = http.createServer(function(req, resp) {
     console.log("start to initate a RPC call..");
-    sendTaskToQueue('hey, here we goo..');
-    resp.end('Hello, World! -- sent the job');
+    sendTaskToQueue('hey, here we goo..', function(replyMsg) {
+      resp.end('Hello, World! -- sent the job' + replyMsg);
+    });
 });
 
 svr.listen(9000, function() {
