@@ -16,9 +16,10 @@ function start() {
 
             function reply(msg) {
                 console.log("xxx...message received:", msg);
-                var response = 'here is the response... here we go...';
+                var response = [{location:'HK'},{location:'Sydeny'}];//'here is the response... here we go...';
+
                 ch.sendToQueue(msg.properties.replyTo,
-                               new Buffer(response.toString()),
+                               new Buffer(JSON.stringify(response)),
                                {correlationId: msg.properties.correlationId});
                 ch.ack(msg);
             }
