@@ -1,18 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="myApp">
 <head>
     <meta charset="utf-8">
     <title>GMN - Home</title>
     <link rel="stylesheet" href="css/app.css"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css" rel="stylesheet" />-->
 </head>
 <script src="js/angular.min.js"></script>
-<body>
+<body ng-controller="myCtrl">
+<header class="navbar navbar-default navbar-fixed-top">
+    <nav>
+        <ul class="nav navbar-nav" style="width: 100%;">
+            <a href="#top" role="button" class="navbar-brand">
+                GMN
+            </a>
+            <li><a href="#section-intro">Inventory</a></li>
+            <li><a href="#section-basics">Bookings</a></li>
+            <li><a href="#section-format">Pricing</a></li>
+            <li><a href="#examples-section">about</a></li>
+        </ul>
+    </nav>
+</header>
 
-<angled-navbar affixed='affixed' brand='GMN' inverse='inverse' menus='menus'></angled-navbar>
+<div style="margin-top:60px;">
+<div class="pull-right">
+    <button type="button" class="btn btn-primary" ng-click="loadData()" style="margin-right: 20px;">Load Inventory Data</button>
+</div>
+<div class="clearfix"></div>
 
-<div ng-app="myApp" ng-controller="myCtrl">
-<button type="button" class="btn btn-primary" ng-click="loadData()">Test Load Data</button>
 <table st-table="rowCollection" class="table table-striped">
     <thead>
     <tr>
@@ -38,34 +54,10 @@
 'use strict';
 var app = angular.module('myApp', ['ui.bootstrap', 'smart-table', 'angularSpinner']);
 app.controller('myCtrl', function($scope, $http, usSpinnerService) {
-    $scope.inverse = true;
-    $scope.menus = [
-        {
-          title : "Dropdown Menu",
-          menu : [
-            {
-              title : "Menu Item One",
-              action : "item.one"
-            },
-            {
-              title : "Menu Item Two",
-              action : "item.two"
-            },
-            {
-              divider: true
-            },
-            {
-              title : "Menu Item Three",
-              action : "item.three"
-            }
-          ]
-        },
-        {
-          title : "Singular Menu Item",
-          action : "singular"
-        }
-    ];
 
+    /*
+    * Smart Table handling
+    */
     $scope.rowCollection = [];
     $scope.loadData = function() {
         usSpinnerService.spin('spinner-1');
