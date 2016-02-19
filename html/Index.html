@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+
+<p>Try to change the names.</p>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+<button ng-click="loadData()">Test Load Data</button>
+<p>{{inventoryData}}</p>
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+    $scope.firstName= "John";
+    $scope.lastName= "Doe";
+    $scope.loadData = function() {
+        $http.get("https://telstragmn-dev-test.apigee.net/gmnservice")
+                 .success(function(response) {
+                    $scope.inventoryData = JSON.stringify(response, null, 4);
+                 })
+                 .error(function(response) {
+                    alert("Failed to load data");
+                 });
+    };
+});
+</script>
+
+</body>
+</html>
