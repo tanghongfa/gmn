@@ -1,24 +1,48 @@
 <!DOCTYPE html>
 <html>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+    <meta charset="utf-8">
+    <title>My AngularJS App</title>
+    <link rel="stylesheet" href="css/app.css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<script src="js/angular.min.js"></script>
 <body>
 
 <p>Try to change the names.</p>
 
 <div ng-app="myApp" ng-controller="myCtrl">
 <button ng-click="loadData()">Test Load Data</button>
-<p>{{inventoryData}}</p>
+<table st-table="rowCollection" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Location</th>
+        <th>Address</th>
+        <th>NETWORK</th>
+        <th>Capabilities</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="row in rowCollection">
+        <td>{{row.LOCATION}}</td>
+        <td>{{row.ADDRESS}}</td>
+        <td>{{row.NETWORK}}</td>
+        <td>{{row.CAPABILITIES}}</td>
+    </tr>
+    </tbody>
+</table>
 </div>
 
 <script>
-var app = angular.module('myApp', []);
+'use strict';
+var app = angular.module('myApp', ['smart-table']);
 app.controller('myCtrl', function($scope, $http) {
-    $scope.firstName= "John";
-    $scope.lastName= "Doe";
+    $scope.rowCollection = [];
+
     $scope.loadData = function() {
         $http.get("https://telstragmn-dev-test.apigee.net/gmnservice")
                  .success(function(response) {
-                    $scope.inventoryData = JSON.stringify(response, null, 4);
+                    $scope.rowCollection = response;
                  })
                  .error(function(response) {
                     alert("Failed to load data");
