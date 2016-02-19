@@ -2,17 +2,17 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>My AngularJS App</title>
+    <title>GMN - Home</title>
     <link rel="stylesheet" href="css/app.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <script src="js/angular.min.js"></script>
 <body>
 
-<p>Try to change the names.</p>
+<angled-navbar affixed='affixed' brand='GMN' inverse='inverse' menus='menus'></angled-navbar>
 
 <div ng-app="myApp" ng-controller="myCtrl">
-<button ng-click="loadData()">Test Load Data</button>
+<button type="button" class="btn btn-primary" ng-click="loadData()">Test Load Data</button>
 <table st-table="rowCollection" class="table table-striped">
     <thead>
     <tr>
@@ -31,20 +31,51 @@
     </tr>
     </tbody>
 </table>
+<span us-spinner="{radius:30, width:8, length: 16}" spinner-key="spinner-1"></span>
 </div>
 
 <script>
 'use strict';
-var app = angular.module('myApp', ['smart-table']);
-app.controller('myCtrl', function($scope, $http) {
-    $scope.rowCollection = [];
+var app = angular.module('myApp', ['ui.bootstrap', 'smart-table', 'angularSpinner']);
+app.controller('myCtrl', function($scope, $http, usSpinnerService) {
+    $scope.inverse = true;
+    $scope.menus = [
+        {
+          title : "Dropdown Menu",
+          menu : [
+            {
+              title : "Menu Item One",
+              action : "item.one"
+            },
+            {
+              title : "Menu Item Two",
+              action : "item.two"
+            },
+            {
+              divider: true
+            },
+            {
+              title : "Menu Item Three",
+              action : "item.three"
+            }
+          ]
+        },
+        {
+          title : "Singular Menu Item",
+          action : "singular"
+        }
+    ];
 
+    $scope.rowCollection = [];
     $scope.loadData = function() {
+        usSpinnerService.spin('spinner-1');
         $http.get("https://telstragmn-dev-test.apigee.net/gmnservice")
                  .success(function(response) {
+                    usSpinnerService.stop('spinner-1');
                     $scope.rowCollection = response;
                  })
                  .error(function(response) {
+                    usSpinnerService.stop('spinner-1');
                     alert("Failed to load data");
                  });
     };
